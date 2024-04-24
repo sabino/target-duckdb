@@ -260,9 +260,9 @@ def persist_lines(connection, config, lines) -> None:
                 # emit latest encountered state
                 emit_state(flushed_state)
 
-            # key_properties key must be available in the SCHEMA message.
-            if "key_properties" not in o:
-                raise Exception("key_properties field is required")
+            # table-key-properties key must be available in the SCHEMA message.
+            if "table-key-properties" not in o:
+                raise Exception("table-key-properties field is required")
 
             # Log based and Incremental replications on tables with no Primary Key
             # cause duplicates when merging UPDATE events.
@@ -272,15 +272,15 @@ def persist_lines(connection, config, lines) -> None:
             #  1) Set ` 'primary_key_required': false ` in the target-duckdb config.json
             if (
                 config.get("primary_key_required", True)
-                and len(o["key_properties"]) == 0
+                and len(o["table-key-properties"]) == 0
             ):
                 LOGGER.critical(
                     "Primary key is set to mandatory but not defined in the [%s] stream",
                     stream,
                 )
-                raise Exception("key_properties field is required")
+                raise Exception("table-key-properties field is required")
 
-            key_properties[stream] = o["key_properties"]
+            key_properties[stream] = o["table-key-properties"]
 
             if config.get("add_metadata_columns") or config.get("hard_delete"):
                 stream_to_sync[stream] = DbSync(
